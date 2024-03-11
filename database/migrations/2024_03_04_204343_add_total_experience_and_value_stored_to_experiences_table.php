@@ -11,17 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('experiences', function (Blueprint $table) {
+        Schema::create('experience_forms', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('organization');
-            $table->text('job_description');
-            $table->date('joining_date');
-            $table->date('leaving_date')->nullable();
-            $table->string('years')->nullable();
-            $table->string('months')->nullable();
-            $table->string('days')->nullable();
-            $table->string('certificate');
+            $table->string('total_experience')->nullable();
+            $table->enum('value_stored', ['yes', 'no'])->default('no');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
@@ -32,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('experiences');
+        Schema::dropIfExists('experience_forms');
     }
 };

@@ -43,7 +43,9 @@ Route::middleware('role:candidate')->group(function () {
     Route::get('/experience-details', [ExperienceController::class, 'ExperienceDetails'])->name('experience.details');
     Route::get('/get-experience-details', [ExperienceController::class, 'GetExperienceDetails'])->name('get.experience.details');
     Route::delete('/get-experience-details/{id}', [ExperienceController::class, 'GetExperienceDetailsDelete'])->name('get.experience.details.delete');
+    Route::get('/get-experience-details/{id}', [ExperienceController::class, 'GetExperienceDetailsGet'])->name('get.experience.details.delete');
     Route::post('/experience-details-submit', [ExperienceController::class, 'ExperienceDetailsSubmit'])->name('experience.details.submit');
+    Route::post('/experience-submit', [ExperienceController::class, 'ExperienceSubmit'])->name('experience.submit');
 });
 Route::middleware('auth')->group(function () {
  

@@ -185,14 +185,14 @@ $(document).ready(function() {
             });
 
         if (isValid) {
-            alert('hi');
+        
             var formData = $(this).serialize();
             $.ajax({
                 url: $(this).attr('action'),
                 type: 'POST',
                 data: formData,
                 success: function(response) {
-                    window.location.replace('/sucess');
+                    window.location.replace('/experience-details');
                 },
                 error: function(xhr, status, error) {
                     // Handle error response

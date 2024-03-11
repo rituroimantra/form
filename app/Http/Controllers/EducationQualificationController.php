@@ -25,7 +25,7 @@ class EducationQualificationController extends Controller
         $userId = Auth::id();
         if (UserQualification::where('user_id', $userId)->exists()) {
             // If the user ID exists, redirect to another page
-            return redirect()->route('experience-details');
+            return redirect()->route('experience.details');
         }
         return view('form.education');
     }

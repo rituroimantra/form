@@ -40,7 +40,7 @@
                         {{ session('status') }}
                     </div>
                     @endif
-                    <form method="POST" action="{{ url('/educational-qualifications-submit') }}" id="formthree"
+                    <form method="POST" action="{{ url('/experience-submit') }}" id="formthree"
                         enctype="multipart/form-data">
                         @csrf
                         <!-- Your Blade template file e.g., experience.blade.php -->
@@ -77,7 +77,17 @@
                                         <!-- Experience rows will be dynamically added here -->
                                     </tbody>
                                 </table>
-                            </div>
+                                <div class="bg1" id="totalexp">
+								<div class="row">
+									<div class="col-sm-6">
+										<label for="F104" class="col-form-label">Total Experience</label>
+										<input type="text" autofocus="" id="totalExperience" name="totalExperience"  placeholder="Total Experience" class="form-control"  readonly="">
+									</div>
+
+								</div>
+							</div>
+                               
+                          
 
 
                         </form>
@@ -97,6 +107,8 @@
                                     <div class="modal-body">
                                         <form id="addExperienceForm" enctype="multipart/form-data">
                                             <!-- Add enctype attribute for file upload -->
+                                            <div id="successMessage" class="alert alert-success" role="alert"></div>
+                                            <input type="hidden" value="" id="espId" name="expeid" disabled/>
                                             <div class="form-group">
                                                 <label for="organization">Name of Organization</label>
                                                 <input type="text" class="form-control" id="organization"
@@ -126,7 +138,7 @@
                                         </form>
 
                                     </div>
-                                   
+
                                 </div>
                             </div>
                         </div>
@@ -225,6 +237,21 @@ function toggleExperienceTable() {
 
                     ]
                 });
+
+
+                 // Calculate total years and days
+            var totalYears = 0;
+            var totalDays = 0;
+            var totalmonths = 0;
+            $.each(response, function(index, item) {
+                totalYears += parseInt(item.years);
+                totalmonths += parseInt(item.years);
+                totalDays += parseInt(item.days);
+            });
+
+            // Display total experience in the container
+            $('#totalExperience').val(totalYears + ' Years ' + totalmonths + ' Months ' + totalDays + ' Days');
+
                 return experienceTableData;
             },
             error: function(xhr, status, error) {
@@ -232,11 +259,36 @@ function toggleExperienceTable() {
             }
         });
     }
+    var espId = "";
+    $(document).on('click', '.edit-btn', function() {
+        isEditing = true; // Set editing flag to true
+        espId = $(this).data('row-id');
+        var rowId = $(this).data('row-id'); 
+        $.ajax({
+            url: '/get-experience-details/' + rowId, 
+            type: 'GET',
+            success: function(response) {
+                // Populate the form fields with the data from the response
+                $('#organization').val(response.data.organization);
+                $('#jobDescription').val(response.data.job_description);
+                $('#joiningDate').val(response.data.joining_date);
+                $('#leavingDate').val(response.data.leaving_date);
+                $('#espId').val(espId).removeAttr("disabled");
+                $('#exampleModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+                // Handle error
+            }
+        });
+    });
     $('#addExperienceForm').submit(function(e) {
         e.preventDefault(); // Prevent the default form submission
-
+        isEditing = false; 
         var formData = new FormData($(this)[0]);
-
+        if (isEditing) {
+            formData.append('expeid', espId);
+        }
         $.ajax({
             url: '/experience-details-submit',
             type: 'POST',
@@ -259,7 +311,9 @@ function toggleExperienceTable() {
                 }
                 // Close the experience model (assuming it's a Bootstrap modal)
                 $('#exampleModal').modal('hide');
-                // You can update your table here with the response data
+                $('#addExperienceForm').trigger("reset");
+                // Show success message
+                $('#successMessage').text("Experience added successfully").show();
             },
             error: function(xhr, status, error) {
                 // Handle error
@@ -274,8 +328,8 @@ function toggleExperienceTable() {
 
 // Handle edit button click
 
-   // Handle edit button click
-   $('#experienceTableData').on('click', '.edit-btn', function(e) {
+// Handle edit button click
+$('#experienceTableData').on('click', '.edit-btn', function(e) {
     e.preventDefault(); // Prevent the default action (e.g., form submission or link click)
 
     // Retrieve the row id associated with the clicked edit button
@@ -304,20 +358,22 @@ $('#experienceTableData').on('click', '.delete-btn', function(e) {
         if (result.isConfirmed) {
             // Perform an AJAX request to delete the item from the server
             $.ajax({
-                url: '/get-experience-details/' + rowId, // Adjust the URL to your delete endpoint
+                url: '/get-experience-details/' +
+                rowId, // Adjust the URL to your delete endpoint
                 type: 'DELETE', // Use the appropriate HTTP method for deletion
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Include CSRF token in headers
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        'content') // Include CSRF token in headers
                 },
                 success: function(response) {
                     // Handle successful deletion
                     console.log('Item deleted:', response);
-               
+
                     var experienceTableData =
-                    toggleExperienceTable(); // Retrieve the DataTable instance
-                if (experienceTableData) {
-                    experienceTableData.ajax.reload(); // Reload the DataTable
-                }
+                        toggleExperienceTable(); // Retrieve the DataTable instance
+                    if (experienceTableData) {
+                        experienceTableData.ajax.reload(); // Reload the DataTable
+                    }
                 },
                 error: function(xhr, status, error) {
                     // Handle error
@@ -333,6 +389,11 @@ $('#experienceTableData').on('click', '.delete-btn', function(e) {
 $('input[name=employee]').change(function() {
     toggleExperienceTable();
 });
+$(document).ready(function() {
+    $('#successMessage').hide(); // Hide the success message initially
+   
+});
+
 </script>
 
 @endpush
